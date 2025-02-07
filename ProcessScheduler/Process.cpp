@@ -32,6 +32,8 @@ void Process::initialize(ProcessType type, int start, int deadline)
 	this->start = start;
 	this->type = type;
 	this->deadline = deadline;
+	this->state = State::QUEUED;
+	this->pid = 0;
 }
 
 void Process::addTask(Task task)
@@ -83,7 +85,10 @@ void Process::tick()
 	if (taskList.front().getRuntime() == 0) {
 		std::cout << "(pid: " << pid << ") " << taskList.front().getType() <<  " Task Completed." <<  std::endl;
 		taskList.pop();
-		setState(State::READY);
+		if (taskList.empty())
+			setState(State::TERMINATED);
+		else
+			setState(State::READY);
 	}
 }
 

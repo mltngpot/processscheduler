@@ -3,5 +3,6 @@ enum State {
 	READY,
 	RUNNING,
 	WAITING,
-	TERMINATED
+	TERMINATED,
+	QUEUED
 };

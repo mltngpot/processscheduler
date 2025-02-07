@@ -25,7 +25,10 @@ bool DiskResource::isBusy()
 
 Process DiskResource::tick(int time)
 {
-	Process process = diskQueue.front();
+	Process process = Process::IDLE;
+	if (!diskQueue.empty())
+		process = diskQueue.front();
+
 	process.tick();
 	if (process.getState() == State::READY) {
 		diskQueue.pop();

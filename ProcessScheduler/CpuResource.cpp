@@ -42,11 +42,8 @@ Process CpuResource::tick(int time)
 	Process process = Process::IDLE;
 	if (this->realTimeCpuQueue.empty())
 	{
-		if (this->interactiveCpuQueue.empty())
-		{
-			return process;
-		}
-		process = this->interactiveCpuQueue.front();
+		if (!this->interactiveCpuQueue.empty())
+			process = this->interactiveCpuQueue.front();
 	}
 	else 
 	{
@@ -56,22 +53,14 @@ Process CpuResource::tick(int time)
 	if (process.getState() == State::READY && process.getType() != ProcessType::IDLE)
 	{
 		if (process.getType() == ProcessType::INTERACTIVE)
-		{
 			this->interactiveCpuQueue.pop();
-		}
 		else
-		{
 			this->realTimeCpuQueue.pop();
-		}
 
 		if (!this->realTimeCpuQueue.empty())
-		{
 			this->realTimeCpuQueue.front().setState(State::RUNNING);
-		}
 		else if (!this->interactiveCpuQueue.empty())
-		{
 			this->interactiveCpuQueue.front().setState(State::RUNNING);
-		}
 	}
 	return process;
 }

@@ -25,7 +25,9 @@ bool TtyResource::isBusy()
 
 Process TtyResource::tick(int time)
 {
-	Process process = this->ttyQueue.front();
+	Process process = Process::IDLE;
+	if (!ttyQueue.empty()) 
+		process = this->ttyQueue.front();
     process.tick();
 	if (process.getState() == State::READY)
 	{

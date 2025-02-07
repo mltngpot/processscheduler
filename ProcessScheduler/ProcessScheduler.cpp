@@ -25,6 +25,7 @@ int main()
 ProcessScheduler::ProcessScheduler()
 {
 	try {
+		currentPid = 1;
 		std::string str = "INTERACTIVE 12000\nCPU 100\nTTY 5000\nCPU 100\nDISK 10\nCPU 20\nREAL-TIME 12000\nDEADLINE 13000\nCPU 30";
 		std::stringstream ss(str);
 		readInput(ss);
@@ -63,8 +64,8 @@ void ProcessScheduler::dequeueInput(int time)
 		cout << "Dequeueing process at time " << time << endl;
 		Process process = inputProcessesQueue.front();
 		inputProcessesQueue.pop();
-		process.setState(State::READY);
 		process.setPid(currentPid++);
+		process.setState(State::READY);
 		queueProcess(process);
 	}
 }
@@ -72,6 +73,8 @@ void ProcessScheduler::dequeueInput(int time)
 void ProcessScheduler::queueProcess(Process process)
 {
 	currentPid++;
+	if (process.getState() == State::TERMINATED)
+		return;
 	switch (process.currentTask().getType()) {
 	case TaskType::CPU:
 		cpuResource.enqueue(process);
@@ -117,15 +120,15 @@ void ProcessScheduler::readInput(std::istream& in) {
 			break;
 		case 'C':
 			if (identifier != "CPU" || inputProcessesQueue.size() == 0) throw runtime_error("Unexpected identifier: " + identifier);
-			inputProcessesQueue.front().addTask(Task(TaskType::CPU, time));
+			inputProcessesQueue.back().addTask(Task(TaskType::CPU, time));
 			break;
 		case 'T':
 			if (identifier != "TTY" || inputProcessesQueue.size() == 0) throw runtime_error("Unexpected identifier: " + identifier);
-			inputProcessesQueue.front().addTask(Task(TaskType::TTY, time));
+			inputProcessesQueue.back().addTask(Task(TaskType::TTY, time));
 			break;
 		case 'D':
 			if (identifier != "DISK" || inputProcessesQueue.size() == 0) throw runtime_error("Unexpected identifier: " + identifier);
-			inputProcessesQueue.front().addTask(Task(TaskType::DISK, time));
+			inputProcessesQueue.back().addTask(Task(TaskType::DISK, time));
 			break;
 		default:
 			throw runtime_error("Unexpected identifier: " + identifier);
