@@ -1,15 +1,16 @@
 #pragma once
 #include <queue>
-#include "Resource.h"
+#include "Process.h"
+#include "SchedulerStatistics.h"
 class TtyResource
 {
 public:
-	TtyResource();
+	TtyResource(SchedulerStatistics statistics);
 	~TtyResource();
 	void enqueue(Process process);
 	bool isBusy();
 	Process tick(int time);
 private:
 	std::queue<Process> ttyQueue;
-
+	SchedulerStatistics statistics;
 };

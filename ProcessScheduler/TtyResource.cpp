@@ -1,8 +1,9 @@
 #include "TtyResource.h"
-#include "Resource.h"
+#include "Process.h"
 
-TtyResource::TtyResource()
+TtyResource::TtyResource(SchedulerStatistics statistics)
 {
+	this->statistics = statistics;
 }
 
 TtyResource::~TtyResource()

@@ -1,8 +1,9 @@
 #include "DiskResource.h"
 #include "Process.h"
 
-DiskResource::DiskResource()
+DiskResource::DiskResource(SchedulerStatistics statistics)
 {
+	this->statistics = statistics;
 }
 
 DiskResource::~DiskResource()
@@ -16,24 +17,31 @@ void DiskResource::enqueue(Process process)
 		process.setState(State::RUNNING);
 	}
 	this->diskQueue.push(process);
+	statistics.newDiskAccess();
 }
 
 bool DiskResource::isBusy()
 {
-    return !this->diskQueue.empty();
+    return !diskQueue.empty();
 }
 
 Process DiskResource::tick(int time)
 {
 	Process process = Process::IDLE;
-	if (!diskQueue.empty())
-		process = diskQueue.front();
+	if (!this->diskQueue.empty()) {
+		process = this->diskQueue.front();
+		statistics.diskAccess(this->diskQueue.size());
+	}
+	else {
+		this->statistics.diskIdle();
+		return process;
+	}
 
 	process.tick();
 	if (process.getState() == State::READY) {
-		diskQueue.pop();
-		if (!diskQueue.empty())
-			diskQueue.front().setState(State::RUNNING);
+		this->diskQueue.pop();
+		if (!this->diskQueue.empty())
+			this->diskQueue.front().setState(State::RUNNING);
 	}
     return process;
 }

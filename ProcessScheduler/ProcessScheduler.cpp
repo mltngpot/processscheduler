@@ -22,11 +22,12 @@ int main()
 }
 
 
-ProcessScheduler::ProcessScheduler()
-{
+ProcessScheduler::ProcessScheduler() : cpuResource(statistics), 
+                                       ttyResource(statistics), 
+	                                   diskResource(statistics) {
 	try {
 		currentPid = 1;
-		std::string str = "INTERACTIVE 12000\nCPU 100\nTTY 5000\nCPU 100\nDISK 10\nCPU 20\nREAL-TIME 12000\nDEADLINE 13000\nCPU 30";
+		std::string str = "INTERACTIVE 12000\nCPU 100\nTTY 5000\nCPU 100\nDISK 10\nCPU 20\nREAL-TIME 12000\nDEADLINE 13000\nCPU 1\nINTERACTIVE 12200\nCPU 100\nTTY 5000\nCPU 100\nDISK 10\nCPU 20\nREAL-TIME 12990\nDEADLINE 13000\nCPU 30";
 		std::stringstream ss(str);
 		readInput(ss);
 		//readInput(std::cin);
@@ -41,8 +42,6 @@ ProcessScheduler::ProcessScheduler()
 }
 
 void ProcessScheduler::run() {
-
-
 	for (int time = 0; stillProcessing(); time++) {
 		try {
 			dequeueInput(time);
@@ -72,17 +71,24 @@ void ProcessScheduler::dequeueInput(int time)
 
 void ProcessScheduler::queueProcess(Process process)
 {
-	currentPid++;
-	if (process.getState() == State::TERMINATED)
+	if (process.getState() == State::RUNNING || 
+		process.getState() == State::TERMINATED || 
+		process.getType() == ProcessType::IDLE)
 		return;
-	switch (process.currentTask().getType()) {
+
+	currentPid++;
+
+	switch (process.getCurrentTask().getType()) {
 	case TaskType::CPU:
+		cout << "Enqueueing (CPU) process (" << process.getPid() << ")" << endl;
 		cpuResource.enqueue(process);
 		break;
 	case TaskType::DISK:
+		cout << "Enqueueing (DISK) process (" << process.getPid() << ")" << endl;
 		diskResource.enqueue(process);
 		break;
 	case TaskType::TTY:
+		cout << "Enqueueing (TTY) process (" << process.getPid() << ")" << endl;
 		ttyResource.enqueue(process);
 		break;
 	default:
@@ -92,9 +98,9 @@ void ProcessScheduler::queueProcess(Process process)
 
 void ProcessScheduler::tick(int time)
 {
-	cpuResource.tick(time);
-	diskResource.tick(time);
-	ttyResource.tick(time);
+	queueProcess(cpuResource.tick(time));
+	queueProcess(diskResource.tick(time));
+	queueProcess(ttyResource.tick(time));
 }
 
 bool ProcessScheduler::stillProcessing() {
@@ -102,7 +108,7 @@ bool ProcessScheduler::stillProcessing() {
 }
 
 void ProcessScheduler::readInput(std::istream& in) {
-	while (!in.eof()) {
+	while (in.good()) {
 		std::string identifier;
 		int time;
 		in >> identifier >> time;

@@ -36,6 +36,10 @@ void SchedulerStatistics::totalRuntime(int duration)
 {
 }
 
+void SchedulerStatistics::newDiskAccess()
+{
+}
+
 std::string SchedulerStatistics::toString()
 {
 	return std::string();

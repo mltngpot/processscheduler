@@ -5,13 +5,13 @@
 
 const Process Process::IDLE = Process(ProcessType::IDLE, 0);
 
-Process::Process(ProcessType type, int start)
+Process::Process(ProcessType type, int start) : currentTask(TaskType::CPU, 0)
 {
 	validate(start, 0);
 	initialize(type, start, 0);
 }
 
-Process::Process(ProcessType type, int start, int deadline)
+Process::Process(ProcessType type, int start, int deadline) : currentTask(TaskType::CPU, 0)
 {
 	validate(start, deadline);
 	initialize(type, start, deadline);
@@ -36,9 +36,35 @@ void Process::initialize(ProcessType type, int start, int deadline)
 	this->pid = 0;
 }
 
+std::string Process::stateToString(State state)
+{
+	switch (state) {
+	case State::READY:
+		return "READY";
+	case State::RUNNING:
+		return "RUNNING";
+	case State::TERMINATED:
+		return "TERMINATED";
+	case State::QUEUED:
+		return "QUEUED";
+	case State::WAITING:
+		return "WAITING";
+	default:
+		return "UNKNOWN";
+	}
+}
+
 void Process::addTask(Task task)
 {
-	taskList.push(task);
+	if (currentTask.getRuntime() == 0)
+		currentTask = task;
+	else
+		taskList.push(task);
+}
+
+Task Process::getCurrentTask()
+{
+	return currentTask;
 }
 
 ProcessType Process::getType()
@@ -53,11 +79,8 @@ int Process::getStart()
 
 bool Process::pastDeadline(int time)
 {
-	if (type == ProcessType::REALTIME && time > deadline) {
-		std::cout << "(pid: " << pid << ") Realtime Process missed deadline." << std::endl;
-		setState(State::TERMINATED);
+	if (type == ProcessType::REALTIME && time > deadline)
 		return true;
-	}
 	return false;
 }
 
@@ -68,27 +91,28 @@ State Process::getState()
 
 void Process::setState(State state)
 {
-	std::cout << "(pid: " << pid << ") Setting state to " << state << std::endl;
+	std::cout << "(pid: " << pid << ") Setting state to " << stateToString(state) << std::endl;
 	this->state = state;
 }
 
-Task Process::currentTask()
-{
-	return taskList.front();
-}
 
 void Process::tick()
 {
-	if (type == ProcessType::IDLE) return;
+	if (type == ProcessType::IDLE) 
+		return;
+	if (getState() == State::READY) 
+		setState(State::RUNNING);
 
-	taskList.front().tick();
-	if (taskList.front().getRuntime() == 0) {
-		std::cout << "(pid: " << pid << ") " << taskList.front().getType() <<  " Task Completed." <<  std::endl;
-		taskList.pop();
+	currentTask.tick();
+	if (currentTask.getRuntime() == 0) {
+		std::cout << "(pid: " << pid << ") " << currentTask.getType() <<  " Task Completed." <<  std::endl;
 		if (taskList.empty())
 			setState(State::TERMINATED);
-		else
+		else {
 			setState(State::READY);
+			currentTask = taskList.front();
+			taskList.pop();
+		}
 	}
 }
 

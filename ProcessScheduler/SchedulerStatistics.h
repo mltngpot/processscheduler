@@ -12,6 +12,7 @@ public:
 	void cpuIdle();
 	void diskIdle();
 	void totalRuntime(int duration);
+	void newDiskAccess();
 	std::string toString();
 private:
 	int realTimeProcessesCompleted = 0;

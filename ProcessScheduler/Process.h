@@ -1,5 +1,6 @@
 #pragma once
 #include <queue>
+#include <string>
 #include "ProcessType.cpp"
 #include "Task.h"
 #include "State.cpp"
@@ -11,17 +12,22 @@ public:
 	Process(ProcessType type, int start, int deadline);
 	~Process();
 	void addTask(Task task);
+	Task getCurrentTask();
 	ProcessType getType();
 	int getStart();
 	bool pastDeadline(int time);
 	State getState();
 	void setState(State state);
-	Task currentTask();
 	void tick();
 	int getPid();
 	void setPid(int pid);
 	static const Process IDLE;
 private:
+	void validate(int start, int deadline);
+	void initialize(ProcessType type, int start, int deadline);
+	static std::string stateToString(State state); // Change to static
+
+	Task currentTask;
 	ProcessType type;
 	State state;
 	int start;
@@ -29,7 +35,4 @@ private:
 	int pid;
 	std::queue<Task> taskList;
 
-	void validate(int start, int deadline);
-	void initialize(ProcessType type, int start, int deadline);
 };
-
