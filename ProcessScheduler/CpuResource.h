@@ -5,11 +5,12 @@
 class CpuResource
 {
 public:
-	CpuResource(SchedulerStatistics statistics);
+	CpuResource();
 	~CpuResource();
 	void enqueue(Process process);
 	bool isBusy();
 	Process tick(int time);
+	void printStatus();
 	Process currentProcess();
 private:
 	void updateCurrentProcess(int time);
@@ -17,5 +18,4 @@ private:
 	std::queue<Process> interactiveCpuQueue;
 	Process currentRealtime;
 	Process currentInteractive;
-	SchedulerStatistics statistics;
 };

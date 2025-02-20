@@ -1,9 +1,9 @@
 #include "TtyResource.h"
 #include "Process.h"
+#include <iostream>
 
-TtyResource::TtyResource(SchedulerStatistics statistics)
+TtyResource::TtyResource() : currentProcess(Process::IDLE)
 {
-	this->statistics = statistics;
 }
 
 TtyResource::~TtyResource()
@@ -21,20 +21,32 @@ void TtyResource::enqueue(Process process)
 
 bool TtyResource::isBusy()
 {
-    return !this->ttyQueue.empty();
+    return !this->ttyQueue.empty() ||
+		currentProcess.getType() != ProcessType::IDLE;
 }
 
 Process TtyResource::tick(int time)
 {
-	Process process = Process::IDLE;
-	if (!ttyQueue.empty()) 
-		process = this->ttyQueue.front();
-    process.tick();
-	if (process.getState() == State::READY)
+	currentProcess.tick();
+	if (currentProcess.getState() == State::READY || currentProcess.getState() == State::TERMINATED)
 	{
-		this->ttyQueue.pop();
-		if (!this->ttyQueue.empty())
-			this->ttyQueue.front().setState(State::WAITING);
+		if (!this->ttyQueue.empty()) {
+			currentProcess = this->ttyQueue.front();
+			currentProcess.setState(State::WAITING);
+		}
 	}
-    return process;
+
+	printStatus();
+
+    return currentProcess;
+}
+
+void TtyResource::printStatus()
+{
+	std::cout << "TTY: ";
+	if (currentProcess.getType() != ProcessType::IDLE)
+		std::cout << "(" << currentProcess.getPid() << ")" << std::endl;
+	else
+		std::cout << "IDLE" << std::endl;
+	std::cout << "returning " << currentProcess.toString() << std::endl << std::endl;
 }

@@ -3,24 +3,22 @@
 class SchedulerStatistics
 {
 public:
-	SchedulerStatistics();
-	~SchedulerStatistics();
-	void realTimeProcessCompleted();
-	void realTimeProcessMissedDeadline();
-	void interactiveProcessCompleted();
-	void diskAccess(int duration);
-	void cpuIdle();
-	void diskIdle();
-	void totalRuntime(int duration);
-	void newDiskAccess();
-	std::string toString();
+	static void realTimeProcessCompleted();
+	static void realTimeProcessMissedDeadline();
+	static void interactiveProcessCompleted();
+	static void diskAccess(int duration);
+	static void cpuIdle();
+	static void diskIdle();
+	static void totalRuntime(int duration);
+	static void newDiskAccess();
+	static std::string toString();
 private:
-	int realTimeProcessesCompleted = 0;
-	int realTimeProcessesMissedDeadline = 0;
-	int interactiveProcessesCompleted = 0;
-	int diskAccesses = 0;
-	int cpuIdleTime = 0;
-	int diskIdleTime = 0;
-	int totalRunTime = 0;
+	static int realTimeProcessesCompleted;
+	static int realTimeProcessesMissedDeadline;
+	static int interactiveProcessesCompleted;
+	static int diskAccesses;
+	static int cpuIdleTime;
+	static int diskIdleTime;
+	static int totalRunTime;
 };
 

@@ -22,12 +22,10 @@ int main()
 }
 
 
-ProcessScheduler::ProcessScheduler() : cpuResource(statistics), 
-                                       ttyResource(statistics), 
-	                                   diskResource(statistics) {
+ProcessScheduler::ProcessScheduler() {
 	try {
 		currentPid = 1;
-		std::string str = "INTERACTIVE 12000\nCPU 100\nTTY 5000\nCPU 100\nDISK 10\nCPU 20\nREAL-TIME 12000\nDEADLINE 13000\nCPU 1\nINTERACTIVE 12200\nCPU 100\nTTY 5000\nCPU 100\nDISK 10\nCPU 20\nREAL-TIME 12990\nDEADLINE 13000\nCPU 30";
+		std::string str = "INTERACTIVE 0\nCPU 3\nTTY 1\nCPU 1\nDISK 1\nCPU 2\nREAL-TIME 0\nDEADLINE 13000\nCPU 2";
 		std::stringstream ss(str);
 		readInput(ss);
 		//readInput(std::cin);
@@ -43,6 +41,7 @@ ProcessScheduler::ProcessScheduler() : cpuResource(statistics),
 
 void ProcessScheduler::run() {
 	for (int time = 0; stillProcessing(); time++) {
+		cout << endl << endl << "TICK: " << time << endl;
 		try {
 			dequeueInput(time);
 		}

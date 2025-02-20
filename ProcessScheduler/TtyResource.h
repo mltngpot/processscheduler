@@ -5,12 +5,13 @@
 class TtyResource
 {
 public:
-	TtyResource(SchedulerStatistics statistics);
+	TtyResource();
 	~TtyResource();
 	void enqueue(Process process);
 	bool isBusy();
 	Process tick(int time);
+	void printStatus();
 private:
 	std::queue<Process> ttyQueue;
-	SchedulerStatistics statistics;
+	Process currentProcess;
 };

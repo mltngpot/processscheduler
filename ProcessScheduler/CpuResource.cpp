@@ -1,11 +1,11 @@
 #include "CpuResource.h"
 #include "Process.h"
+#include <iostream>
 
-CpuResource::CpuResource(SchedulerStatistics statistics) :
+CpuResource::CpuResource() :
 	currentRealtime(ProcessType::IDLE, 0),
 	currentInteractive(ProcessType::IDLE, 0)
 {
-	this->statistics = statistics;
 }
 
 CpuResource::~CpuResource()
@@ -21,17 +21,19 @@ void CpuResource::enqueue(Process process)
 	else
 	{
 		this->realTimeCpuQueue.push(process);
+		if (currentInteractive.getType() != ProcessType::IDLE && currentInteractive.getStart() == State::RUNNING)
+			currentInteractive.setState(State::READY);
 	}
 
-	if (currentRealtime.getType() == ProcessType::IDLE && currentInteractive.getType() == ProcessType::IDLE)
+	if (currentRealtime.getType() == ProcessType::IDLE || currentInteractive.getType() == ProcessType::IDLE)
 		updateCurrentProcess(0);
 }
 
 bool CpuResource::isBusy()
 {
-	return !this->interactiveCpuQueue.empty() &&
-		!this->realTimeCpuQueue.empty() &&
-		currentRealtime.getType() != ProcessType::IDLE &&
+	return !this->interactiveCpuQueue.empty() ||
+		!this->realTimeCpuQueue.empty() ||
+		currentRealtime.getType() != ProcessType::IDLE ||
 		currentInteractive.getType() != ProcessType::IDLE;
 }
 
@@ -39,7 +41,7 @@ Process CpuResource::tick(int time)
 {
 	Process process = currentProcess();
 	if (process.getType() == ProcessType::IDLE) {
-		statistics.cpuIdle();
+		SchedulerStatistics::cpuIdle();
 		return process;
 	}
 	process.tick();
@@ -47,7 +49,26 @@ Process CpuResource::tick(int time)
 	{
 		updateCurrentProcess(time);
 	}
+
+	printStatus();
+
 	return process;
+}
+
+void CpuResource::printStatus()
+{
+	std::cout << "currentRealtime: ";
+	if (currentRealtime.getType() != ProcessType::IDLE)
+		std::cout << "(" << currentRealtime.getPid() << ")";
+	else
+		std::cout << "IDLE";
+	std::cout << "\tcurrentInteractive: ";
+	if (currentInteractive.getType() != ProcessType::IDLE)
+		std::cout << "(" << currentInteractive.getPid() << ")";
+	else
+		std::cout << "IDLE";
+	std::cout << std::endl;
+	std::cout << "returning " << currentProcess().toString() << std::endl;
 }
 
 Process CpuResource::currentProcess()
@@ -66,7 +87,8 @@ Process CpuResource::currentProcess()
 
 void CpuResource::updateCurrentProcess(int time)
 {
-	if (currentRealtime.getType() != ProcessType::IDLE)
+	// handle realtime processess first
+	if (!realTimeCpuQueue.empty() || currentRealtime.getType() != ProcessType::IDLE)
 	{
 		while (!realTimeCpuQueue.empty() && currentRealtime.getState() != State::RUNNING) {
 			currentRealtime = realTimeCpuQueue.front();
@@ -81,7 +103,7 @@ void CpuResource::updateCurrentProcess(int time)
 		}
 	}
 
-	// It could be Idle now
+	// It could be Idle now so lets look at Interactives
 	if (currentRealtime.getType() == ProcessType::IDLE)
 	{
 		if (currentInteractive.getType() != ProcessType::IDLE)
@@ -93,7 +115,8 @@ void CpuResource::updateCurrentProcess(int time)
 			interactiveCpuQueue.pop();
 			currentInteractive.setState(State::RUNNING);
 		}
-		else
+
+		if (currentInteractive.getState() != State::RUNNING)
 		{
 			currentInteractive = Process::IDLE;
 		}

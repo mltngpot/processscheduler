@@ -98,14 +98,14 @@ void Process::setState(State state)
 
 void Process::tick()
 {
-	if (type == ProcessType::IDLE) 
+	if (type == ProcessType::IDLE)
 		return;
-	if (getState() == State::READY) 
+	if (getState() == State::READY)
 		setState(State::RUNNING);
 
 	currentTask.tick();
 	if (currentTask.getRuntime() == 0) {
-		std::cout << "(pid: " << pid << ") " << currentTask.getType() <<  " Task Completed." <<  std::endl;
+		std::cout << "(pid: " << pid << ") " << currentTask.getType() << " Task Completed." << std::endl;
 		if (taskList.empty())
 			setState(State::TERMINATED);
 		else {
@@ -124,4 +124,12 @@ int Process::getPid()
 void Process::setPid(int pid)
 {
 	this->pid = pid;
+}
+
+std::string Process::toString()
+{
+	std::string str = "pid(" + std::to_string(pid) + ")";
+	str += " type(" + std::to_string(type) + ")";
+	str += " state(" + stateToString(state) + ")";
+	return str;
 }

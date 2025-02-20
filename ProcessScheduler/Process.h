@@ -21,6 +21,7 @@ public:
 	void tick();
 	int getPid();
 	void setPid(int pid);
+	std::string toString();
 	static const Process IDLE;
 private:
 	void validate(int start, int deadline);

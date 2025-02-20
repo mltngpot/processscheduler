@@ -5,13 +5,15 @@
 class DiskResource
 {
 public:
-	DiskResource(SchedulerStatistics statistics);
+	DiskResource();
 	~DiskResource();
 	void enqueue(Process process);
 	bool isBusy();
 	Process tick(int time);
+	void printStatus();
 private:
 	std::queue<Process> diskQueue;
-	SchedulerStatistics statistics;
+	Process currentProcess;
+	int queuedProcesses = 0;
 };
 
