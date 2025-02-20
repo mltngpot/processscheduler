@@ -7,15 +7,15 @@ class CpuResource
 public:
 	CpuResource();
 	~CpuResource();
-	void enqueue(Process process);
+	void enqueue(Process* process);
 	bool isBusy();
-	Process tick(int time);
+	Process* tick(int time);
 	void printStatus();
-	Process currentProcess();
+	Process* currentProcess();
 private:
 	void updateCurrentProcess(int time);
-	std::queue<Process> realTimeCpuQueue;
-	std::queue<Process> interactiveCpuQueue;
-	Process currentRealtime;
-	Process currentInteractive;
+	std::queue<Process*> realTimeCpuQueue;
+	std::queue<Process*> interactiveCpuQueue;
+	Process* currentRealtime;
+	Process* currentInteractive;
 };
